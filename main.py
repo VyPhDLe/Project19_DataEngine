@@ -23,7 +23,6 @@ rf_model.fit(X_train, y_train)
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    # Get the data from the request
     data = request.json
     flow_sp = data['flow_sp']
 
