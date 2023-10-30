@@ -64,4 +64,4 @@ jobs:
         with:
           app-name: 'p19engine'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_48875CF4268F4212B49B5935B4F8643D }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_97842E055B044FDAA75567BB7C12D628 }}
