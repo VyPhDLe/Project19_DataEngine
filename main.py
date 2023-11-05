@@ -8,7 +8,7 @@ from sklearn.metrics import mean_squared_error
 app = Flask(__name__)
 
 # Load the dataset
-df = pd.read_csv(r'C:\Users\duyvy\OneDrive\Máy tính\Lab19_Dataset.csv')
+df = pd.read_csv('Lab19_Dataset.csv')
 X = df[['Flow SP (GPM)']]
 y = df[['Flow Rate (GPM)', 'C_Valve %Open', 'DPT_01 (PSI)', 'DPT_02 (PSI)', 'DPT_03 (PSI)']]
 
@@ -23,7 +23,6 @@ rf_model.fit(X_train, y_train)
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    # Get the data from the request
     data = request.json
     flow_sp = data['flow_sp']
 
@@ -42,7 +41,7 @@ def predict():
     return jsonify(response)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=8000)
 
 
 
