@@ -1,6 +1,6 @@
 import requests
 
-API_URL = 'http://localhost:5000/predict'
+API_URL = 'http://127.0.0.1:5000/predict'
 
 data = {
     'loop_name': 'Venturi Loop',
