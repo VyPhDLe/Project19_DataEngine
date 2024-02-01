@@ -5,10 +5,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 import numpy as np
 
-# Load the dataset
 df = pd.read_csv('Lab19_Dataset.csv')
-
-# Map 'CLOSED' to 0 and 'OPEN' to 1
 df.replace({'CLOSED': 0, 'OPEN': 1}, inplace=True)
 
 # Extract features and target
@@ -17,10 +14,8 @@ y = df[['Flow Rate (GPM)', 'C_Valve %Open', 'DPT_01 (PSI)', 'DPT_02 (PSI)', 'DPT
         'DPT_05 (PSI)', 'DPT_06 (PSI)', 'DPT_07 (PSI)', 'DPT_08 (PSI)', 'DPT_09 (PSI)', 'DPT_10 (PSI)',
         'DPT_11 (PSI)', 'GPT_01 (PSI)', 'GPT_02 (PSI)', 'GPT_03 (PSI)']]
 
-# Split the data
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Train a Random Forest Regressor model
 rf_model = RandomForestRegressor(n_estimators=100, random_state=42)
 rf_model.fit(X_train, y_train)
 
@@ -28,10 +23,12 @@ rf_model.fit(X_train, y_train)
 y_train_pred = rf_model.predict(X_train)
 mean_error = np.sqrt(mean_squared_error(y_train, y_train_pred))
 
-def predict(sv_values, flow_sp):
+def predict(sv_config_str, flow_sp):
     try:
 
-        # One-hot encode the provided SV values
+        sv_values = [int(char) for char in sv_config_str]
+
+        # One-hot encode the provided SV values and flow setpoint
         sv_input = pd.get_dummies(pd.DataFrame(sv_values + [flow_sp])).reindex(columns=X.columns, fill_value=0)
 
         prediction = rf_model.predict([sv_input.iloc[0].values])
@@ -65,10 +62,11 @@ def predict(sv_values, flow_sp):
         print(f"Prediction error: {str(e)}")
         return {'error': 'Internal Server Error'}
 
-# Example usage
-sv_values = [0, 0, 0, 1, 0, 0, 1, 1, 0]
-flow_sp = 15
-result = predict(sv_values, flow_sp)
+
+sv_config_str_example = "000100110"
+flow_sp_example = 15
+result = predict(sv_config_str_example, flow_sp_example)
+
 if result is not None:
     print(f"Predicted Flow Rate: {result['predicted_flow_rate']}")
     print(f"Predicted C Valve Percent Open: {result['predicted_c_valve_percent_open']}")
