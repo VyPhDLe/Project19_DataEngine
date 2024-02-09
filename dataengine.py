@@ -8,32 +8,34 @@ import numpy as np
 df = pd.read_csv('Lab19_Dataset.csv')
 df.replace({'CLOSED': 0, 'OPEN': 1}, inplace=True)
 
+
 X = pd.get_dummies(df[['SV_01', 'SV_02', 'SV_03', 'SV_04', 'SV_05', 'SV_06', 'SV_07', 'SV_08', 'SV_09', 'Flow SP (GPM)']])
 y = df[['Flow Rate (GPM)', 'C_Valve %Open', 'DPT_01 (PSI)', 'DPT_02 (PSI)', 'DPT_03 (PSI)', 'DPT_04 (PSI)',
         'DPT_05 (PSI)', 'DPT_06 (PSI)', 'DPT_07 (PSI)', 'DPT_08 (PSI)', 'DPT_09 (PSI)', 'DPT_10 (PSI)',
         'DPT_11 (PSI)', 'GPT_01 (PSI)', 'GPT_02 (PSI)', 'GPT_03 (PSI)']]
 
+
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-rf_model = RandomForestRegressor(n_estimators=100, random_state=42)
+
+rf_model = RandomForestRegressor(n_estimators=1000, random_state=42)
 rf_model.fit(X_train, y_train)
 
-# Calculate mean error on the training data
 y_train_pred = rf_model.predict(X_train)
 mean_error = np.sqrt(mean_squared_error(y_train, y_train_pred))
 
 def predict(sv_config_str, flow_sp):
     try:
 
-        sv_values = [int(char) for char in sv_config_str]
-
         # One-hot encode the provided SV values and flow setpoint
-        sv_input = pd.get_dummies(pd.DataFrame(sv_values + [flow_sp])).reindex(columns=X.columns, fill_value=0)
+        sv_values = [int(char) for char in sv_config_str]
+        sv_input = pd.get_dummies(pd.DataFrame([sv_values + [flow_sp]], columns=X.columns)).reindex(columns=X.columns, fill_value=0)
 
-        prediction = rf_model.predict([sv_input.iloc[0].values])
+        prediction = rf_model.predict(sv_input)
 
         perturbation = random.uniform(-0.05, 0.05)
         perturbed_prediction = [value + value * perturbation for value in prediction[0]]
+
 
 
         response = {
@@ -53,7 +55,7 @@ def predict(sv_config_str, flow_sp):
             'predicted_gpt_01': perturbed_prediction[13],
             'predicted_gpt_02': perturbed_prediction[14],
             'predicted_gpt_03': perturbed_prediction[15],
-            'mean_error': mean_error
+            'mean_error': mean_error,
         }
         return response
 
@@ -62,9 +64,10 @@ def predict(sv_config_str, flow_sp):
         return {'error': 'Internal Server Error'}
 
 
-sv_config_str_example = "000100110"
-flow_sp_example = 15
-result = predict(sv_config_str_example, flow_sp_example)
+
+sv_config_str = "011000110"
+flow_sp = 10
+result = predict(sv_config_str, flow_sp)
 
 if result is not None:
     print(f"Predicted Flow Rate: {result['predicted_flow_rate']}")
