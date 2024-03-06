@@ -4,10 +4,8 @@ import random
 
 def predict_onnx(sv_config_str, flow_sp):
     try:
-        # Load the ONNX model
-        session = ort.InferenceSession("rf_model.onnx")
+        session = ort.InferenceSession("rf_model.onnx") #
 
-        # One-hot encode the provided SV values and flow setpoint
         sv_values = [int(char) for char in sv_config_str]
         input_data = np.array([sv_values + [flow_sp]], dtype=np.float32)
 
@@ -27,9 +25,8 @@ def predict_onnx(sv_config_str, flow_sp):
         print(f"Prediction error: {str(e)}")
         return None
 
-# Example usage
-sv_config_str = "000100110"
-flow_sp = 20
+sv_config_str = "000001110" # Take input from each valve then combine to this string
+flow_sp = 10
 result = predict_onnx(sv_config_str, flow_sp)
 
 if result is not None:
