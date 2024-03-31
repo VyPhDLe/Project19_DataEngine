@@ -1,0 +1,54 @@
+using System;
+using System.Net.Http;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
+
+class Program
+{
+    static async Task Main(string[] args)
+    {
+        string svConfigStr = "000100110";
+        int flowSp = 15;
+        var result = await SendPredictionRequest(svConfigStr, flowSp);
+
+        if (result != null)
+        {
+            Console.WriteLine("Prediction Result:");
+            Console.WriteLine(result);
+        }
+        else
+        {
+            Console.WriteLine("Error occurred during prediction.");
+        }
+    }
+
+    static async Task<string> SendPredictionRequest(string svConfigStr, int flowSp)
+    {
+        string url = "https://duyvylatoi.pythonanywhere.com/predict";
+
+        using (HttpClient client = new HttpClient())
+        {
+            var data = new
+            {
+                sv_config_str = svConfigStr,
+                flow_sp = flowSp
+            };
+
+            var json = JsonSerializer.Serialize(data);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await client.PostAsync(url, content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadAsStringAsync();
+            }
+            else
+            {
+                Console.WriteLine($"Request failed with status code {response.StatusCode}");
+                return null;
+            }
+        }
+    }
+}
