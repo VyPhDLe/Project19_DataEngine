@@ -1,7 +1,7 @@
 import requests
 
 def send_prediction_request(sv_config_str, flow_sp):
-    url = 'https://duyvylatoi.pythonanywhere.com/predict'
+    url = 'http://127.0.0.1:9000/predict'
 
     data = {
         'sv_config_str': sv_config_str,
@@ -18,7 +18,7 @@ def send_prediction_request(sv_config_str, flow_sp):
 
 if __name__ == "__main__":
 
-    sv_config_str = "100000110"
+    sv_config_str = "000000000"
     flow_sp = 15
     result = send_prediction_request(sv_config_str, flow_sp)
 
@@ -27,3 +27,5 @@ if __name__ == "__main__":
         print(result)
     else:
         print("Error occurred during prediction.")
+
+
