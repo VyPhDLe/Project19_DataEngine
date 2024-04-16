@@ -59,7 +59,7 @@ def predict():
                                 'SV_06': sv_values[5],
                                 'SV_07': sv_values[6],
                                 'SV_08': sv_values[7],
-                                'SV_09': sv_values[8]}, index=[df.index[-1]+1])  # Ensure a new index for the new row
+                                'SV_09': sv_values[8]}, index=[df.index[-1]+1])
 
         df = pd.concat([df, new_row])
 
@@ -70,7 +70,6 @@ def predict():
         perturbation = random.uniform(-0.05, 0.05)
         perturbed_prediction = [round(value + value * perturbation, 2) for value in prediction[0]]
 
-        # Determine the loop based on SV values
         loop = determine_loop(sv_values)
 
         df.loc[df.index[-1], 'Flow Rate (GPM)':'GPT_03 (PSI)'] = perturbed_prediction
