@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from flask import Flask, request, jsonify
 import base64
 import io
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -58,11 +59,13 @@ def predict():
         flow_sp = data['flow_sp']
 
         sv_values = [int(char) for char in sv_config_str]
-
         pump_status = 'ON' if any(sv_values) else 'OFF'
+        current_time = datetime.now().strftime('%m/%d/%Y %I:%M:%S %p')
 
         #Add new row each time user perform prediction
-        new_row = pd.DataFrame({'Pump': pump_status,
+        new_row = pd.DataFrame({
+                                'Time': current_time,
+                                'Pump': pump_status,
                                 'Flow SP (GPM)': flow_sp,
                                 'SV_01': sv_values[0],
                                 'SV_02': sv_values[1],
@@ -98,7 +101,7 @@ def predict():
             filtered_df = df[
                 df[['SV_01', 'SV_02', 'SV_03', 'SV_04', 'SV_05', 'SV_06', 'SV_07', 'SV_08', 'SV_09']].apply(
                     lambda x: list(x) == sv_values, axis=1)]
-            plt.scatter(filtered_df['Flow Set Point (GPM)'], filtered_df[output], color='blue', label='Actual data recorded')
+            plt.scatter(filtered_df['Flow SP (GPM)'], filtered_df[output], color='blue', label='Actual data recorded')
             plt.scatter(flow_sp, perturbed_prediction[lab_outputs.index(output)], color='red', label='Predicted value',
                         marker='o', s=100)
 
