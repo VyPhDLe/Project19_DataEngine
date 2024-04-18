@@ -17,9 +17,11 @@ lab_outputs = ['Flow Rate (GPM)', 'C_Valve %Open', 'DPT_01 (PSI)', 'DPT_02 (PSI)
               'DPT_11 (PSI)', 'GPT_01 (PSI)', 'GPT_02 (PSI)', 'GPT_03 (PSI)']
 lab_inputs = ['SV_01', 'SV_02', 'SV_03', 'SV_04', 'SV_05', 'SV_06', 'SV_07', 'SV_08', 'SV_09', 'Flow SP (GPM)']
 
+#Split data into training set and test set
 X = pd.get_dummies(df[lab_inputs])
 y = df[lab_outputs]
 
+#Apply regressor model
 rf_model = RandomForestRegressor(n_estimators=1000, random_state=42)
 rf_model.fit(X, y)
 
@@ -44,7 +46,7 @@ def determine_loop(sv_values):
     elif sv_values == [0, 0, 0, 0, 0, 0, 0, 0, 0]:
         return "Offset"
     else:
-        return "Unknown Loop (*)"
+        return "Unknown Loop (*)"   # (*) Meaning this loop never got recorded before, prediction may be wrong
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -59,6 +61,7 @@ def predict():
 
         pump_status = 'ON' if any(sv_values) else 'OFF'
 
+        #Add new row each time user perform prediction
         new_row = pd.DataFrame({'Pump': pump_status,
                                 'Flow SP (GPM)': flow_sp,
                                 'SV_01': sv_values[0],
@@ -75,6 +78,7 @@ def predict():
 
         X = pd.get_dummies(df[lab_inputs])
 
+        #Introduce perturbation so results won't repeat
         prediction = rf_model.predict(X.iloc[[-1]])
 
         perturbation = random.uniform(-0.05, 0.05)
@@ -85,6 +89,8 @@ def predict():
         df.loc[df.index[-1], 'Flow Rate (GPM)':'GPT_03 (PSI)'] = perturbed_prediction
         df.loc[df.index[-1], 'Loop'] = loop
 
+
+        #This part is to plot the diagram
         sprites = {}
         for output in lab_outputs:
             plt.figure(figsize=(8, 6))
@@ -104,7 +110,7 @@ def predict():
 
             plt.close()
 
-            buffer = io.BytesIO()
+            buffer = io.BytesIO()   #save the diagrams as base64 string included within JSON file to send to Unity
             plt.savefig(buffer, format='png')
             buffer.seek(0)
             img_str = base64.b64encode(buffer.read()).decode('utf-8')
@@ -131,7 +137,7 @@ def predict():
             'gpt_01': perturbed_prediction[13],
             'gpt_02': perturbed_prediction[14],
             'gpt_03': perturbed_prediction[15],
-            'mean_error': round(mean_error, 2),
+            'mean_error': round(mean_error, 3),
             'loop': loop,
             'sprites': sprites
         }
