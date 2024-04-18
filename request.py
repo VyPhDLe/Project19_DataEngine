@@ -18,8 +18,8 @@ def send_prediction_request(sv_config_str, flow_sp):
 
 if __name__ == "__main__":
 
-    sv_config_str = "000000000"
-    flow_sp = 15
+    sv_config_str = "010000000"
+    flow_sp = 20
     result = send_prediction_request(sv_config_str, flow_sp)
 
     if result is not None:
